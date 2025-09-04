@@ -1,0 +1,110 @@
+# MediaMTX configuration for Baby Monitor
+# Documentation: https://github.com/bluenviron/mediamtx
+
+# General settings
+logLevel: info
+logDestinations: [stdout]
+logFile: /var/log/mediamtx/mediamtx.log
+
+# API settings
+api: true
+apiAddress: :9997
+
+# Metrics
+metrics: true
+metricsAddress: :9998
+
+# WebRTC settings
+webrtc: true
+webrtcAddress: :8889
+webrtcEncryption: false
+webrtcServerKey: server.key
+webrtcServerCert: server.crt
+webrtcAllowOrigin: "*"
+webrtcTrustedProxies: []
+webrtcICEServers2: []
+
+# RTSP settings
+rtsp: true
+rtspAddress: :8554
+protocols: [multicast, tcp]
+
+# RTMP settings
+rtmp: true
+rtmpAddress: :1935
+rtmpEncryption: false
+
+# HLS settings
+hls: true
+hlsAddress: :8888
+hlsEncryption: false
+hlsAllowOrigin: "*"
+hlsVariant: lowLatency
+hlsSegmentCount: 7
+hlsSegmentDuration: 1s
+hlsPartDuration: 200ms
+hlsSegmentMaxSize: 50M
+
+# Authentication
+authMethod: basic
+
+# Default path settings
+pathDefaults:
+  # Source settings
+  source: publisher
+  sourceFingerprint: ""
+  sourceOnDemand: false
+  sourceOnDemandStartTimeout: 10s
+  sourceOnDemandCloseAfter: 10s
+  
+  # Authentication
+  publishUser: ""
+  publishPass: ""
+  publishIPs: []
+  readUser: baby
+  readPass: monitor
+  readIPs: []
+  
+  # Recording
+  record: false
+  recordPath: ./recordings/%path/%Y-%m-%d_%H-%M-%S-%f
+  recordFormat: mp4
+  recordPartDuration: 1s
+  recordSegmentDuration: 1h
+  recordDeleteAfter: 24h
+
+# Camera paths configuration
+paths:
+  # Main nursery camera
+  nursery:
+    source: rtsp://192.168.1.101:554/stream1
+    sourceOnDemand: true
+    sourceOnDemandStartTimeout: 10s
+    sourceOnDemandCloseAfter: 10s
+    readUser: baby
+    readPass: monitor
+    
+  # Playroom camera
+  playroom:
+    source: rtsp://192.168.1.102:554/stream1
+    sourceOnDemand: true
+    sourceOnDemandStartTimeout: 10s
+    sourceOnDemandCloseAfter: 10s
+    readUser: baby
+    readPass: monitor
+    
+  # Kitchen camera (optional)
+  kitchen:
+    source: rtsp://192.168.1.103:554/stream1
+    sourceOnDemand: true
+    sourceOnDemandStartTimeout: 10s
+    sourceOnDemandCloseAfter: 10s
+    readUser: baby
+    readPass: monitor
+
+  # Test stream for development
+  test:
+    source: rtsp://rtsp.stream/pattern
+    sourceOnDemand: true
+    readUser: baby
+    readPass: monitor
