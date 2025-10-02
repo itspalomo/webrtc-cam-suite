@@ -1,4 +1,4 @@
-import { AppConfig, Camera, Credentials, RTCIceServer } from '@/types';
+import { AppConfig, Credentials } from '@/types';
 
 /**
  * Configuration management for the BabyCam Viewer app
@@ -63,6 +63,7 @@ export const loadConfig = (): AppConfig => {
         ...DEFAULT_CONFIG,
         ...parsedConfig,
         // Ensure cameras array is properly typed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         cameras: parsedConfig.cameras?.map((cam: any) => ({
           ...cam,
           lastSeen: cam.lastSeen ? new Date(cam.lastSeen) : undefined,
@@ -176,7 +177,7 @@ export const validateServerUrl = (url: string): boolean => {
  */
 export const testServerConnection = async (serverUrl: string): Promise<boolean> => {
   try {
-    const response = await fetch(serverUrl, {
+    await fetch(serverUrl, {
       method: 'HEAD',
       mode: 'no-cors', // Avoid CORS issues during connectivity test
     });

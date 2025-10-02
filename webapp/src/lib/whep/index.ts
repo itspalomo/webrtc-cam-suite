@@ -105,8 +105,10 @@ export const createWhepSession = async (
       }
     } catch (fetchError) {
       console.error('Network error details:', fetchError);
-      console.error('Error name:', fetchError.name);
-      console.error('Error message:', fetchError.message);
+      if (fetchError instanceof Error) {
+        console.error('Error name:', fetchError.name);
+        console.error('Error message:', fetchError.message);
+      }
       throw fetchError;
     }
 

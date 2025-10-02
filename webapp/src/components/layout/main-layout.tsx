@@ -9,14 +9,13 @@ import {
   Settings,
   Shield,
   LogOut,
-  Baby,
   Camera,
   ChevronLeft
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { logout } from '@/lib/auth';
+import { clearSiteAuth } from '@/lib/site-auth';
 
 /**
  * Main layout component for authenticated pages
@@ -56,7 +55,8 @@ export function MainLayout({
   const pathname = usePathname();
 
   const handleLogout = () => {
-    logout();
+    clearSiteAuth();
+    // Clear session and redirect to login
     window.location.href = '/login';
   };
 
@@ -82,8 +82,8 @@ export function MainLayout({
                 </Button>
               ) : (
                 <Link href="/" className="flex items-center space-x-2">
-                  <Baby className="h-8 w-8 text-blue-600" />
-                  <span className="text-xl font-bold text-gray-900">BabyCam</span>
+                  <Shield className="h-8 w-8 text-blue-600" />
+                  <span className="text-xl font-bold text-gray-900">WebRTC Cam Suite</span>
                 </Link>
               )}
             </div>
@@ -154,9 +154,9 @@ export function MainLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center space-x-4">
-              <span>© 2024 BabyCam Viewer</span>
+              <span>© 2024 WebRTC Cam Suite</span>
               <Separator orientation="vertical" className="h-4" />
-              <span>WebRTC WHEP Streaming</span>
+              <span>Secure WHEP Streaming</span>
             </div>
             <div className="flex items-center space-x-2">
               <Camera className="h-4 w-4" />

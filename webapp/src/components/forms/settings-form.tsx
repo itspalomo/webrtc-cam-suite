@@ -5,9 +5,7 @@ import { motion } from 'framer-motion';
 import {
   Server,
   Camera,
-  Settings as SettingsIcon,
   Play,
-  Volume2,
   Wifi,
   CheckCircle,
   XCircle,
@@ -16,7 +14,11 @@ import {
   Trash2,
   Save,
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  Key,
+  Shield,
+  Lock,
+  Info
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -27,11 +29,21 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-import { AppConfig, Camera as CameraType, ValidationResult } from '@/types';
+import { AppConfig, Camera as CameraType, ValidationResult, Credentials } from '@/types';
 import { loadConfig, saveConfig, testServerConnection, validateServerUrl } from '@/config';
+import { 
+  getDefaultCameraCredentials, 
+  setDefaultCameraCredentials, 
+  validateCameraCredentials 
+} from '@/lib/camera-auth';
+import { 
+  getSiteAuthConfig, 
+  setSiteCredentials, 
+  shouldPromptPasswordChange 
+} from '@/lib/site-auth';
+import { toast } from 'sonner';
 
 /**
  * SettingsForm provides comprehensive configuration management
@@ -58,22 +70,50 @@ export function SettingsForm({
   }>({ status: 'idle' });
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Load initial config
+  // Camera auth state
+  const [defaultCameraUsername, setDefaultCameraUsername] = useState('');
+  const [defaultCameraPassword, setDefaultCameraPassword] = useState('');
+  const [cameraTestResult, setCameraTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Account security state
+  const [currentUsername, setCurrentUsername] = useState('');
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [usingDefaultCredentials, setUsingDefaultCredentials] = useState(false);
+
+  // Load initial config and auth state
   useEffect(() => {
     const loadedConfig = loadConfig();
     setConfig(loadedConfig);
+
+    // Load camera credentials
+    const camCreds = getDefaultCameraCredentials();
+    if (camCreds) {
+      setDefaultCameraUsername(camCreds.username);
+      setDefaultCameraPassword(camCreds.password);
+    }
+
+    // Load site credentials info
+    const siteConfig = getSiteAuthConfig();
+    if (siteConfig.credentials) {
+      setCurrentUsername(siteConfig.credentials.username);
+      setNewUsername(siteConfig.credentials.username);
+    }
+    setUsingDefaultCredentials(shouldPromptPasswordChange());
+
     setIsLoading(false);
   }, []);
 
   // Update config field
-  const updateConfig = (field: keyof AppConfig, value: any) => {
+  const updateConfig = (field: keyof AppConfig, value: unknown) => {
     if (!config) return;
     setConfig({ ...config, [field]: value });
     setValidationErrors([]); // Clear errors when user makes changes
   };
 
   // Update camera field
-  const updateCamera = (cameraId: string, field: keyof CameraType, value: any) => {
+  const updateCamera = (cameraId: string, field: keyof CameraType, value: unknown) => {
     if (!config) return;
     const updatedCameras = config.cameras.map(cam =>
       cam.id === cameraId ? { ...cam, [field]: value } : cam
@@ -91,6 +131,7 @@ export function SettingsForm({
         
         // If both username and password are empty, remove credentials entirely
         if (!updatedCredentials.username && !updatedCredentials.password) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { credentials, ...camWithoutCredentials } = cam;
           return camWithoutCredentials;
         }
@@ -200,6 +241,87 @@ export function SettingsForm({
     };
   };
 
+  // Test default camera credentials
+  const testDefaultCameraCredentials = async () => {
+    if (!config) return;
+
+    if (!defaultCameraUsername || !defaultCameraPassword) {
+      setCameraTestResult({
+        success: false,
+        message: 'Please enter both username and password'
+      });
+      return;
+    }
+
+    setCameraTestResult(null);
+
+    try {
+      const credentials: Credentials = {
+        username: defaultCameraUsername,
+        password: defaultCameraPassword
+      };
+
+      // Use first camera path for testing, or 'test' if no cameras
+      const testPath = config.cameras.length > 0 ? config.cameras[0].path : 'test';
+      
+      const result = await validateCameraCredentials(
+        config.serverUrl,
+        testPath,
+        credentials
+      );
+
+      setCameraTestResult({
+        success: result.success,
+        message: result.success 
+          ? 'Credentials validated successfully!' 
+          : result.error || 'Validation failed'
+      });
+
+      // Save credentials if successful
+      if (result.success) {
+        setDefaultCameraCredentials(credentials);
+        toast.success('Default camera credentials saved');
+      }
+    } catch (err) {
+      console.error('Failed to test credentials:', err);
+      setCameraTestResult({
+        success: false,
+        message: 'Failed to test credentials'
+      });
+    }
+  };
+
+  // Handle password change
+  const handleChangePassword = () => {
+    if (!newUsername || !newPassword) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    // Save new credentials
+    setSiteCredentials({
+      username: newUsername,
+      password: newPassword
+    });
+
+    setCurrentUsername(newUsername);
+    setUsingDefaultCredentials(false);
+    setNewPassword('');
+    setConfirmPassword('');
+
+    toast.success('Website credentials updated successfully!');
+  };
+
   // Save configuration
   const handleSave = async () => {
     if (!config) return;
@@ -212,10 +334,21 @@ export function SettingsForm({
 
     setIsSaving(true);
     try {
+      // Save camera credentials
+      if (defaultCameraUsername && defaultCameraPassword) {
+        setDefaultCameraCredentials({
+          username: defaultCameraUsername,
+          password: defaultCameraPassword
+        });
+      }
+
       await saveConfig(config);
       onSave?.(config);
-    } catch (error) {
+      toast.success('Settings saved successfully!');
+    } catch (err) {
+      console.error('Failed to save configuration:', err);
       setValidationErrors(['Failed to save configuration']);
+      toast.error('Failed to save settings');
     } finally {
       setIsSaving(false);
     }
@@ -277,9 +410,11 @@ export function SettingsForm({
         )}
 
         <Tabs defaultValue="server" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="server">Server</TabsTrigger>
             <TabsTrigger value="cameras">Cameras</TabsTrigger>
+            <TabsTrigger value="camera-auth">Camera Auth</TabsTrigger>
+            <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="playback">Playback</TabsTrigger>
           </TabsList>
 
@@ -464,6 +599,196 @@ export function SettingsForm({
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Camera Authentication Tab */}
+          <TabsContent value="camera-auth" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Camera Authentication
+                </CardTitle>
+                <CardDescription>
+                  Configure default credentials for accessing camera streams via MediaMTX.
+                  These are separate from your website login.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Alert className="bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-900">
+                    <strong>What are camera credentials?</strong>
+                    <br />
+                    These username/password are sent to your MediaMTX server when connecting
+                    to camera streams. They are NOT the same as your website login.
+                    <br /><br />
+                    You can set:
+                    <ul className="list-disc ml-5 mt-2 space-y-1">
+                      <li><strong>Global defaults</strong> - used for all cameras unless overridden</li>
+                      <li><strong>Per-camera credentials</strong> - specific to each camera (set in Cameras tab)</li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+
+                <Separator />
+
+                <div>
+                  <Label className="text-base font-semibold">Default Camera Credentials</Label>
+                  <p className="text-sm text-gray-500 mb-4">
+                    These credentials will be used for all cameras that don&apos;t have specific credentials configured.
+                  </p>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="camera-username">MediaMTX Username</Label>
+                      <Input
+                        id="camera-username"
+                        placeholder="e.g., camuser"
+                        value={defaultCameraUsername}
+                        onChange={(e) => setDefaultCameraUsername(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="camera-password">MediaMTX Password</Label>
+                      <Input
+                        id="camera-password"
+                        type="password"
+                        placeholder="MediaMTX password"
+                        value={defaultCameraPassword}
+                        onChange={(e) => setDefaultCameraPassword(e.target.value)}
+                      />
+                    </div>
+
+                    <Button
+                      onClick={testDefaultCameraCredentials}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Wifi className="h-4 w-4 mr-2" />
+                      Test Credentials Against Server
+                    </Button>
+
+                    {cameraTestResult && (
+                      <Alert variant={cameraTestResult.success ? "default" : "destructive"}>
+                        {cameraTestResult.success ? (
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <XCircle className="h-4 w-4" />
+                        )}
+                        <AlertDescription>
+                          {cameraTestResult.message}
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                  <p className="font-medium text-gray-900">Security Best Practices:</p>
+                  <ul className="list-disc ml-5 space-y-1 text-gray-600">
+                    <li>Use different credentials for website login vs. camera access</li>
+                    <li>Set per-camera credentials for cameras requiring different access levels</li>
+                    <li>Rotate camera credentials regularly on your MediaMTX server</li>
+                    <li>Never share camera credentials publicly or in screenshots</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Account Security Tab */}
+          <TabsContent value="account" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Account Security
+                </CardTitle>
+                <CardDescription>
+                  Change your website login credentials
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {usingDefaultCredentials && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      <strong>Action Required:</strong> You are using the default credentials (admin/changeme).
+                      Please change your password immediately to secure your installation.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Current Username</Label>
+                    <Input
+                      value={currentUsername}
+                      disabled
+                      className="bg-gray-50"
+                    />
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-username">New Username</Label>
+                    <Input
+                      id="new-username"
+                      placeholder="Enter new username"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      placeholder="Enter new password (min 8 characters)"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm Password</Label>
+                    <Input
+                      id="confirm-password"
+                      type="password"
+                      placeholder="Re-enter new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleChangePassword}
+                    className="w-full"
+                    disabled={!newUsername || !newPassword || newPassword !== confirmPassword}
+                  >
+                    <Lock className="h-4 w-4 mr-2" />
+                    Update Website Credentials
+                  </Button>
+                </div>
+
+                <Separator />
+
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 space-y-2 text-sm">
+                  <p className="font-medium text-yellow-900">⚠️ Important</p>
+                  <ul className="list-disc ml-5 space-y-1 text-yellow-800">
+                    <li>Changing these credentials will log you out</li>
+                    <li>Make sure to remember your new credentials</li>
+                    <li>These credentials are stored locally in your browser</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
