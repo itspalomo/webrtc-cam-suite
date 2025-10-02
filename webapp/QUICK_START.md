@@ -146,7 +146,7 @@ After setup:
 
 - **Per-Camera Credentials:** Go to Settings → Cameras and add username/password for individual cameras
 - **Test Before Saving:** Use the "Test Credentials" button to verify before saving
-- **Organize Cameras:** Give them meaningful names like "Nursery", "Playroom", etc.
+- **Organize Cameras:** Give them meaningful names like "Front Door", "Backyard", "Office", etc.
 - **Check Stats:** Enable stats overlay to see latency, bitrate, etc.
 
 ## 📞 Need Help?

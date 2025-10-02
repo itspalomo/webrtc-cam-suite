@@ -1,4 +1,4 @@
-// Core data types for the BabyCam Viewer app
+// Core data types for the WebRTC Camera Suite
 
 /**
  * User credentials for authentication
@@ -14,18 +14,25 @@ export interface Credentials {
 export interface Camera {
   id: string;
   name: string;
-  path: string; // MediaMTX stream path (e.g., "nursery", "playroom")
+  path: string; // MediaMTX stream path (e.g., "camera1", "camera2")
   lastSeen?: Date;
   status: CameraStatus;
   thumbnail?: string; // Optional thumbnail URL
   // Optional per-camera credentials (overrides global auth)
   credentials?: Credentials;
+  // Protocol preference (default: 'auto' for WebRTC → HLS fallback)
+  protocol?: StreamingProtocol;
 }
 
 /**
  * Camera connection status
  */
 export type CameraStatus = 'online' | 'offline' | 'unknown' | 'connecting';
+
+/**
+ * Streaming protocol preference
+ */
+export type StreamingProtocol = 'webrtc' | 'hls' | 'auto';
 
 /**
  * WebRTC player connection states

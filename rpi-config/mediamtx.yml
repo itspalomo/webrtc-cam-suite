@@ -1,4 +1,4 @@
-# MediaMTX configuration for Baby Monitor
+# MediaMTX configuration for WebRTC Camera Suite
 # Documentation: https://github.com/bluenviron/mediamtx
 
 # General settings
@@ -61,8 +61,8 @@ pathDefaults:
   publishUser: ""
   publishPass: ""
   publishIPs: []
-  readUser: baby
-  readPass: monitor
+  readUser: admin
+  readPass: changeme
   readIPs: []
   
   # Recording
@@ -75,36 +75,36 @@ pathDefaults:
 
 # Camera paths configuration
 paths:
-  # Main nursery camera
-  nursery:
+  # Camera 1
+  camera1:
     source: rtsp://192.168.1.101:554/stream1
     sourceOnDemand: true
     sourceOnDemandStartTimeout: 10s
     sourceOnDemandCloseAfter: 10s
-    readUser: baby
-    readPass: monitor
+    readUser: admin
+    readPass: changeme
     
-  # Playroom camera
-  playroom:
+  # Camera 2
+  camera2:
     source: rtsp://192.168.1.102:554/stream1
     sourceOnDemand: true
     sourceOnDemandStartTimeout: 10s
     sourceOnDemandCloseAfter: 10s
-    readUser: baby
-    readPass: monitor
+    readUser: admin
+    readPass: changeme
     
-  # Kitchen camera (optional)
-  kitchen:
+  # Camera 3 (optional)
+  camera3:
     source: rtsp://192.168.1.103:554/stream1
     sourceOnDemand: true
     sourceOnDemandStartTimeout: 10s
     sourceOnDemandCloseAfter: 10s
-    readUser: baby
-    readPass: monitor
+    readUser: admin
+    readPass: changeme
 
   # Test stream for development
   test:
     source: rtsp://rtsp.stream/pattern
     sourceOnDemand: true
-    readUser: baby
-    readPass: monitor
+    readUser: admin
+    readPass: changeme

@@ -1,10 +1,10 @@
 # Raspberry Pi Configuration
 
-This directory contains MediaMTX server configuration and setup scripts for your Raspberry Pi baby monitor.
+This directory contains MediaMTX server configuration and setup scripts for your Raspberry Pi camera streaming system.
 
 ## Files
 
-- **`mediamtx.yml`** - MediaMTX server configuration with baby monitor optimized settings
+- **`mediamtx.yml`** - MediaMTX server configuration with camera streaming optimized settings
 - **`install.sh`** - Complete installation script for Raspberry Pi
 - **`update.sh`** - Script to update MediaMTX to the latest version
 
@@ -12,12 +12,12 @@ This directory contains MediaMTX server configuration and setup scripts for your
 
 1. **Copy files to your Raspberry Pi:**
    ```bash
-   scp -r rpi-config/ pi@your-pi-ip:~/baby-monitor/
+   scp -r rpi-config/ pi@your-pi-ip:~/camera-suite/
    ```
 
 2. **Run the installation script:**
    ```bash
-   cd ~/baby-monitor/rpi-config
+   cd ~/camera-suite/rpi-config
    chmod +x install.sh update.sh
    ./install.sh
    ```
@@ -26,7 +26,7 @@ This directory contains MediaMTX server configuration and setup scripts for your
    Edit `/etc/mediamtx/mediamtx.yml` and update the camera IP addresses:
    ```yaml
    paths:
-     nursery:
+     camera1:
        source: rtsp://192.168.1.101:554/stream1  # Update this IP
    ```
 
@@ -43,15 +43,15 @@ This directory contains MediaMTX server configuration and setup scripts for your
 - **HLS Port:** 8888
 - **RTSP Port:** 8554
 - **API Port:** 9997
-- **Default Username:** baby
-- **Default Password:** monitor
+- **Default Username:** admin
+- **Default Password:** changeme
 
 ### Camera Paths
 
 The configuration includes these default camera paths:
-- `/nursery` - Main nursery camera
-- `/playroom` - Playroom camera
-- `/kitchen` - Kitchen camera (optional)
+- `/camera1` - First camera
+- `/camera2` - Second camera
+- `/camera3` - Third camera (optional)
 - `/test` - Test stream for development
 
 ### Security Features
@@ -97,10 +97,10 @@ curl http://localhost:9997/v3/config/get
 ### Test camera streams
 ```bash
 # Check if camera path exists
-curl http://localhost:8889/nursery/
+curl http://localhost:8889/camera1/
 
 # Test with authentication
-curl -u baby:monitor http://localhost:8889/nursery/
+curl -u admin:changeme http://localhost:8889/camera1/
 ```
 
 ### Common Issues
@@ -136,7 +136,7 @@ curl -u baby:monitor http://localhost:8889/nursery/
 ## Network Configuration
 
 ### Port Forwarding (for remote access)
-If you want to access your baby monitor remotely, configure your router to forward these ports:
+If you want to access your camera system remotely, configure your router to forward these ports:
 
 - **8889** → Pi IP:8889 (WebRTC)
 - **8888** → Pi IP:8888 (HLS - optional)

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Baby Monitor Raspberry Pi Setup Script
+# WebRTC Camera Suite Raspberry Pi Setup Script
 # This script installs and configures MediaMTX on Raspberry Pi OS
 
 set -e
@@ -42,7 +42,7 @@ if [[ $EUID -eq 0 ]]; then
    exit 1
 fi
 
-print_status "Starting Baby Monitor Raspberry Pi setup..."
+print_status "Starting Camera Suite Raspberry Pi setup..."
 
 # Update system
 print_status "Updating system packages..."
@@ -118,7 +118,7 @@ sudo chmod 640 $CONFIG_DIR/mediamtx.yml
 print_status "Creating systemd service..."
 sudo tee /etc/systemd/system/$SERVICE_NAME.service > /dev/null <<EOF
 [Unit]
-Description=MediaMTX Baby Monitor Server
+Description=MediaMTX Camera Suite Server
 After=network.target
 Wants=network.target
 
@@ -179,7 +179,7 @@ fi
 # Display status information
 print_status "Installation completed!"
 echo
-echo "=== Baby Monitor Setup Complete ==="
+echo "=== Camera Suite Setup Complete ==="
 echo "MediaMTX Version: $MEDIAMTX_VERSION"
 echo "Install Directory: $INSTALL_DIR"
 echo "Config Directory: $CONFIG_DIR"
@@ -199,8 +199,8 @@ echo "RTSP:    rtsp://$(hostname -I | awk '{print $1}'):8554"
 echo "API:     http://$(hostname -I | awk '{print $1}'):9997"
 echo
 echo "=== Default Credentials ==="
-echo "Username: baby"
-echo "Password: monitor"
+echo "Username: admin"
+echo "Password: changeme"
 echo
 print_warning "Remember to:"
 print_warning "1. Update camera IP addresses in $CONFIG_DIR/mediamtx.yml"
@@ -208,4 +208,4 @@ print_warning "2. Change default credentials for production use"
 print_warning "3. Configure your cameras to stream to the RTSP endpoints"
 print_warning "4. Test the setup with the webapp"
 
-print_success "Baby Monitor Raspberry Pi setup completed successfully!"
+print_success "Camera Suite Raspberry Pi setup completed successfully!"

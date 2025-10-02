@@ -17,7 +17,7 @@ export default function PrivacyPage() {
               Privacy & Security
             </h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Learn how BabyCam Viewer handles your credentials and protects your privacy
+              Learn how Camera Suite handles your credentials and protects your privacy
             </p>
           </div>
 
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
                 <div>
                   <h3 className="font-medium text-gray-900">No Data Collection</h3>
                   <p className="text-gray-600">
-                    BabyCam Viewer does not collect, store, or transmit any personal data to external servers.
+                    Camera Suite does not collect, store, or transmit any personal data to external servers.
                     All authentication happens directly between your browser and your MediaMTX server.
                   </p>
                 </div>

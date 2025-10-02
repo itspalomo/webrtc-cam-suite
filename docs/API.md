@@ -1,6 +1,6 @@
 # MediaMTX API Reference
 
-This document describes the MediaMTX API endpoints used by the baby monitor system.
+This document describes the MediaMTX API endpoints used by the WebRTC Camera Suite.
 
 ## Base Configuration
 
@@ -13,7 +13,7 @@ This document describes the MediaMTX API endpoints used by the baby monitor syst
 All API requests require HTTP Basic Authentication using the same credentials configured for stream access.
 
 ```bash
-curl -u baby:monitor http://192.168.1.100:9997/v3/config/get
+curl -u admin:changeme http://192.168.1.100:9997/v3/config/get
 ```
 
 ## Core Endpoints
@@ -35,11 +35,11 @@ GET /v3/config/get
   "webrtc": true,
   "webrtcAddress": ":8889",
   "paths": {
-    "nursery": {
+    "camera1": {
       "source": "rtsp://192.168.1.101:554/stream1",
       "sourceOnDemand": true,
-      "readUser": "baby",
-      "readPass": "monitor"
+      "readUser": "admin",
+      "readPass": "changeme"
     }
   }
 }
@@ -55,17 +55,17 @@ Content-Type: application/json
 ```json
 {
   "paths": {
-    "nursery": {
+    "camera1": {
       "source": "rtsp://192.168.1.101:554/stream1",
       "sourceOnDemand": true,
-      "readUser": "baby",
-      "readPass": "monitor"
+      "readUser": "admin",
+      "readPass": "changeme"
     },
-    "playroom": {
+    "camera2": {
       "source": "rtsp://192.168.1.102:554/stream1",
       "sourceOnDemand": true,
-      "readUser": "baby",
-      "readPass": "monitor"
+      "readUser": "admin",
+      "readPass": "changeme"
     }
   }
 }

@@ -113,6 +113,7 @@ export function clearSiteAuth(): void {
   // This allows the same credentials to be used on next login
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('site_authenticated');
+    sessionStorage.removeItem(LAST_ACTIVITY_KEY);
   }
 }
 
@@ -128,12 +129,51 @@ export function shouldPromptPasswordChange(): boolean {
   );
 }
 
+// Session timeout configuration
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+const LAST_ACTIVITY_KEY = 'site_last_activity';
+
+/**
+ * Update last activity timestamp
+ */
+export function updateLastActivity(): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+}
+
+/**
+ * Check if session has timed out
+ */
+export function isSessionTimedOut(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const lastActivity = sessionStorage.getItem(LAST_ACTIVITY_KEY);
+  if (!lastActivity) return true;
+  
+  const timeSinceActivity = Date.now() - parseInt(lastActivity, 10);
+  return timeSinceActivity > SESSION_TIMEOUT;
+}
+
 /**
  * Check if user has an active site session
  */
 export function hasSiteSession(): boolean {
   if (typeof window === 'undefined') return false;
-  return sessionStorage.getItem('site_authenticated') === 'true';
+  
+  const isAuthenticated = sessionStorage.getItem('site_authenticated') === 'true';
+  
+  if (!isAuthenticated) return false;
+  
+  // Check for timeout
+  if (isSessionTimedOut()) {
+    clearSiteAuth();
+    return false;
+  }
+  
+  // Update last activity on check
+  updateLastActivity();
+  
+  return true;
 }
 
 /**
@@ -142,6 +182,7 @@ export function hasSiteSession(): boolean {
 export function createSiteSession(): void {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem('site_authenticated', 'true');
+  updateLastActivity();
 }
 
 /**

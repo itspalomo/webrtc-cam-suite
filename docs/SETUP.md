@@ -1,10 +1,10 @@
-# Baby Monitor Setup Guide
+# Camera Suite Setup Guide
 
-This guide walks you through setting up your complete baby monitor system with Raspberry Pi and the web viewer.
+This guide walks you through setting up your complete camera streaming system with Raspberry Pi and the web viewer.
 
 ## Overview
 
-The baby monitor system consists of:
+The WebRTC Camera Suite consists of:
 - **Raspberry Pi** running MediaMTX server for video streaming
 - **IP Cameras** connected to your network
 - **Web Application** for viewing streams on any device
