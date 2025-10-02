@@ -1,4 +1,4 @@
-// Core data types for the BabyCam Viewer app
+// Core data types for the WebRTC Camera Suite
 
 /**
  * User credentials for authentication

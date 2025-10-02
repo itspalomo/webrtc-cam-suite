@@ -1,7 +1,7 @@
 import { AppConfig, Credentials } from '@/types';
 
 /**
- * Configuration management for the BabyCam Viewer app
+ * Configuration management for the WebRTC Camera Suite
  * Handles environment variables, localStorage, and default values
  */
 
@@ -22,16 +22,16 @@ const getEnvArray = (key: string, defaultValue: string[] = []): string[] => {
 
 // Default configuration values
 export const DEFAULT_CONFIG: Partial<AppConfig> = {
-  serverUrl: getEnvVar('BABYCAM_SERVER_URL', 'http://localhost:8889'),
-  iceServers: getEnvArray('BABYCAM_ICE_SERVERS', ['stun:stun.l.google.com:19302']).map(url => ({
+  serverUrl: getEnvVar('CAMSUITE_SERVER_URL', 'http://localhost:8889'),
+  iceServers: getEnvArray('CAMSUITE_ICE_SERVERS', ['stun:stun.l.google.com:19302']).map(url => ({
     urls: url.startsWith('stun:') || url.startsWith('turn:') ? url : `stun:${url}`
   })),
   autoPlay: true,
   startMuted: true,
-  rememberCredentials: getEnvVar('BABYCAM_DEFAULT_REMEMBER', 'false').toLowerCase() === 'true',
-  cameras: getEnvArray('BABYCAM_CAMERAS', ['cam']).map((name, index) => ({
+  rememberCredentials: getEnvVar('CAMSUITE_DEFAULT_REMEMBER', 'false').toLowerCase() === 'true',
+  cameras: getEnvArray('CAMSUITE_CAMERAS', ['camera1']).map((name, index) => ({
     id: `camera-${index}`,
-    name: name === 'cam' ? 'Baby Camera' : name.charAt(0).toUpperCase() + name.slice(1),
+    name: name === 'camera1' ? 'Camera 1' : name.charAt(0).toUpperCase() + name.slice(1),
     path: name,
     status: 'unknown' as const,
   })),
@@ -39,9 +39,9 @@ export const DEFAULT_CONFIG: Partial<AppConfig> = {
 
 // Local storage keys
 const STORAGE_KEYS = {
-  APP_CONFIG: 'babycam_config',
-  CREDENTIALS: 'babycam_credentials',
-  UI_PREFERENCES: 'babycam_ui_prefs',
+  APP_CONFIG: 'camsuite_config',
+  CREDENTIALS: 'camsuite_credentials',
+  UI_PREFERENCES: 'camsuite_ui_prefs',
 } as const;
 
 /**

@@ -1,6 +1,6 @@
-# Pi Baby Monitor
+# WebRTC Camera Suite
 
-A complete baby monitor system combining Raspberry Pi streaming server with a modern web viewer. Features ultra-low latency WebRTC streaming, mobile-optimized interface, and easy setup scripts.
+A complete camera streaming system combining Raspberry Pi streaming server with a modern web viewer. Features ultra-low latency WebRTC streaming, mobile-optimized interface, and easy setup scripts. Perfect for home security, business monitoring, pet cams, and more.
 
 ![WebRTC](https://img.shields.io/badge/WebRTC-WHEP-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
@@ -10,7 +10,7 @@ A complete baby monitor system combining Raspberry Pi streaming server with a mo
 ## 🏗️ Project Structure
 
 ```
-pi-baby-monitor/
+webrtc-camera-suite/
 ├── rpi-config/          # MediaMTX configs, service files, Pi setup scripts
 │   ├── mediamtx.yml     # MediaMTX server configuration
 │   ├── install.sh       # Raspberry Pi installation script
@@ -40,7 +40,7 @@ pi-baby-monitor/
 - **🔄 Auto-Reconnection**: Intelligent reconnection with exponential backoff
 - **🎛️ Advanced Controls**: Play/pause, mute, fullscreen, picture-in-picture
 - **⌨️ Keyboard Shortcuts**: Desktop shortcuts for camera switching and controls
-- **🎨 Modern UI**: Clean, calming interface perfect for baby monitoring
+- **🎨 Modern UI**: Clean, intuitive interface for any monitoring use case
 - **🏠 Self-Hosted**: Complete privacy with local-only streaming
 - **🔧 Easy Setup**: Automated Raspberry Pi installation scripts
 
@@ -63,12 +63,12 @@ pi-baby-monitor/
 1. **Flash Raspberry Pi OS** to microSD card
 2. **Copy installation files** to your Pi:
    ```bash
-   scp -r rpi-config/ pi@your-pi-ip:~/baby-monitor/
+   scp -r rpi-config/ pi@your-pi-ip:~/camera-suite/
    ```
 3. **Run the installation script**:
    ```bash
    ssh pi@your-pi-ip
-   cd ~/baby-monitor/rpi-config
+   cd ~/camera-suite/rpi-config
    ./install.sh
    ```
 
@@ -113,8 +113,8 @@ pi-baby-monitor/
 After installation, your system will have:
 
 - **MediaMTX Server**: Running on Pi at port 8889 (WebRTC)
-- **Default Credentials**: `baby` / `monitor` 
-- **Camera Paths**: `/nursery`, `/playroom`, `/kitchen`
+- **Default Credentials**: `admin` / `changeme` (change immediately!)
+- **Camera Paths**: `/camera1`, `/camera2`, `/camera3` (configurable)
 - **Web Interface**: Accessible via Pi's IP or localhost:3000
 
 ## 🔒 Security Features
@@ -138,7 +138,7 @@ sudo systemctl status mediamtx
 sudo journalctl -u mediamtx -f
 
 # Update MediaMTX
-cd ~/baby-monitor/rpi-config
+cd ~/camera-suite/rpi-config
 ./update.sh
 ```
 
@@ -171,7 +171,7 @@ npm run type-check
 curl http://pi-ip:9997/v3/config/get
 
 # Test camera stream  
-curl -u baby:monitor http://pi-ip:8889/nursery/
+curl -u admin:changeme http://pi-ip:8889/camera1/
 
 # Check system resources
 htop
@@ -202,7 +202,7 @@ The web interface is fully optimized for mobile:
 - **Touch Controls**: Large, finger-friendly buttons
 - **Responsive Layout**: Adapts to any screen size  
 - **Swipe Navigation**: Gesture-based camera switching
-- **Wake Lock**: Keeps screen on during monitoring
+- **Wake Lock**: Keeps screen on during viewing
 - **Offline Support**: Works without internet connection
 
 ## 🤝 Contributing
@@ -231,6 +231,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Ready to monitor your little one? 👶📹**
+**Ready to set up your camera monitoring system? 📹🔒**
+
+Perfect for:
+- 🏠 Home security monitoring
+- 👶 Baby/nursery monitoring  
+- 🐕 Pet monitoring
+- 🏢 Business/office surveillance
+- 🚗 Garage/driveway monitoring
 
 Get started with the [Complete Setup Guide](docs/SETUP.md) or jump to [Raspberry Pi Configuration](rpi-config/README.md)!

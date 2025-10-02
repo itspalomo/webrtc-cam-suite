@@ -56,7 +56,10 @@ export const createWhepSession = async (
   // Handle ICE connection state changes
   peerConnection.oniceconnectionstatechange = () => {
     const state = peerConnection.iceConnectionState;
-    console.log('ICE connection state:', state);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WHEP] ICE connection state:', state);
+    }
 
     if (state === 'connected' || state === 'completed') {
       isActive = true;
@@ -66,9 +69,10 @@ export const createWhepSession = async (
   };
 
   try {
-    console.log('Creating WHEP session for URL:', whepUrl);
-    console.log('Server URL:', serverUrl);
-    console.log('Camera Path:', cameraPath);
+    // Debug logging (gated for development only)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[WHEP] Creating session for:', whepUrl);
+    }
     
     // Create SDP offer
     const offer = await peerConnection.createOffer({
@@ -77,11 +81,6 @@ export const createWhepSession = async (
     });
 
     await peerConnection.setLocalDescription(offer);
-
-    console.log('Generated SDP offer:', offer.sdp?.substring(0, 100) + '...');
-    console.log('Sending WHEP request to:', whepUrl);
-    console.log('With credentials:', credentials.username);
-    console.log('Authorization header:', createAuthHeader(credentials));
 
     // Send offer to WHEP endpoint
     let response: Response;
@@ -95,8 +94,9 @@ export const createWhepSession = async (
         body: offer.sdp,
       });
 
-      console.log('WHEP response status:', response.status);
-      console.log('WHEP response headers:', Object.fromEntries(response.headers.entries()));
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[WHEP] Response status:', response.status);
+      }
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -104,11 +104,7 @@ export const createWhepSession = async (
         throw new Error(`WHEP request failed: ${response.status} ${response.statusText} - ${errorText}`);
       }
     } catch (fetchError) {
-      console.error('Network error details:', fetchError);
-      if (fetchError instanceof Error) {
-        console.error('Error name:', fetchError.name);
-        console.error('Error message:', fetchError.message);
-      }
+      console.error('[WHEP] Network error:', fetchError instanceof Error ? fetchError.message : 'Unknown error');
       throw fetchError;
     }
 
@@ -244,7 +240,9 @@ export const reconnectWhepSession = async (
   let lastSession: WhepSession | null = null;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    console.log(`Reconnection attempt ${attempt}/${maxAttempts}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[WHEP] Reconnection attempt ${attempt}/${maxAttempts}`);
+    }
 
     // Close previous session if it exists
     if (lastSession) {
@@ -255,7 +253,9 @@ export const reconnectWhepSession = async (
       const session = await createWhepSession(serverUrl, cameraPath, credentials, iceServers);
 
       if (session.isActive) {
-        console.log('Reconnection successful');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[WHEP] Reconnection successful');
+        }
         return session;
       }
 
@@ -264,12 +264,13 @@ export const reconnectWhepSession = async (
       // Exponential backoff delay
       if (attempt < maxAttempts) {
         const delay = baseDelay * Math.pow(2, attempt - 1);
-        console.log(`Waiting ${delay}ms before next attempt`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
 
     } catch (error) {
-      console.warn(`Reconnection attempt ${attempt} failed:`, error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[WHEP] Reconnection attempt ${attempt} failed:`, error);
+      }
 
       // Wait before next attempt
       if (attempt < maxAttempts) {

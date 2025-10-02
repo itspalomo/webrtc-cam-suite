@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { validateSiteLogin, createSiteSession } from '@/lib/site-auth';
+import { checkLoginLockout, recordFailedLogin, resetRateLimit, formatRemainingTime } from '@/lib/site-auth/rate-limit';
 
 /**
  * LoginForm component for site authentication
@@ -31,11 +32,20 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDefaultWarning, setShowDefaultWarning] = useState(false);
+  const [lockoutInfo, setLockoutInfo] = useState<{ isLocked: boolean; remainingTime?: number } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setShowDefaultWarning(false);
+
+    // Check for lockout
+    const lockout = checkLoginLockout();
+    if (lockout.isLocked) {
+      setLockoutInfo(lockout);
+      setError(`Too many failed attempts. Please wait ${formatRemainingTime(lockout.remainingTime || 0)} before trying again.`);
+      return;
+    }
 
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
@@ -48,12 +58,23 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
       const result = validateSiteLogin(username, password);
 
       if (!result.success) {
-        setError(result.message || 'Invalid credentials');
+        // Record failed attempt and check for lockout
+        const rateLimitResult = recordFailedLogin();
+        
+        if (rateLimitResult.isLocked) {
+          setLockoutInfo({ isLocked: true, remainingTime: rateLimitResult.remainingTime });
+          setError(`Too many failed attempts (${rateLimitResult.attempts}/${5}). Account locked for ${formatRemainingTime(rateLimitResult.remainingTime || 0)}.`);
+        } else {
+          const remainingAttempts = 5 - rateLimitResult.attempts;
+          setError(`${result.message || 'Invalid credentials'}. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`);
+        }
+        
         setIsLoading(false);
         return;
       }
 
-      // Success - create session
+      // Success - reset rate limit and create session
+      resetRateLimit();
       createSiteSession();
 
       // Show warning if using default credentials
@@ -177,7 +198,7 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || lockoutInfo?.isLocked}
               size="lg"
             >
               {isLoading ? (

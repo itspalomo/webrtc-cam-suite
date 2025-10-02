@@ -44,6 +44,7 @@ import {
   shouldPromptPasswordChange 
 } from '@/lib/site-auth';
 import { toast } from 'sonner';
+import { CredentialSecurityWarning } from '@/components/credential-security-warning';
 
 /**
  * SettingsForm provides comprehensive configuration management
@@ -617,6 +618,9 @@ export function SettingsForm({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Security Warning */}
+                <CredentialSecurityWarning />
+
                 <Alert className="bg-blue-50 border-blue-200">
                   <Info className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-sm text-blue-900">
