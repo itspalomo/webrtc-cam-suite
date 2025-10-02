@@ -20,12 +20,19 @@ export interface Camera {
   thumbnail?: string; // Optional thumbnail URL
   // Optional per-camera credentials (overrides global auth)
   credentials?: Credentials;
+  // Protocol preference (default: 'auto' for WebRTC → HLS fallback)
+  protocol?: StreamingProtocol;
 }
 
 /**
  * Camera connection status
  */
 export type CameraStatus = 'online' | 'offline' | 'unknown' | 'connecting';
+
+/**
+ * Streaming protocol preference
+ */
+export type StreamingProtocol = 'webrtc' | 'hls' | 'auto';
 
 /**
  * WebRTC player connection states

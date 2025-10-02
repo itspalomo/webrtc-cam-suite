@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { AuthGate } from '@/components/layout/auth-gate';
 import { MainLayout } from '@/components/layout/main-layout';
-import { Player } from '@/components/player/player';
+import { PlayerWithFallback } from '@/components/player/player-with-fallback';
 import { CameraSwitcher } from '@/components/camera-switcher';
 import { loadConfig } from '@/config';
 import { getMockCameraById } from '@/lib/mock-data';
@@ -55,8 +55,9 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
                 </div>
               </div>
             }>
-              <Player
+              <PlayerWithFallback
                 camera={camera}
+                serverUrl={config.serverUrl}
                 className="w-full aspect-video"
                 autoPlay={config.autoPlay}
                 startMuted={config.startMuted}
@@ -80,7 +81,7 @@ export default async function ViewerPage({ params }: ViewerPageProps) {
 
                 <div className="text-right text-sm text-gray-500">
                   <p>Server: {config.serverUrl}</p>
-                  <p>WebRTC WHEP Protocol</p>
+                  <p>Protocol: {camera.protocol || 'auto'} (WebRTC → HLS fallback)</p>
                 </div>
               </div>
             </div>

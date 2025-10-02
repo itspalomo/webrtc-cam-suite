@@ -26,12 +26,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 
-import { AppConfig, Camera as CameraType, ValidationResult, Credentials } from '@/types';
+import { AppConfig, Camera as CameraType, ValidationResult, Credentials, StreamingProtocol } from '@/types';
 import { loadConfig, saveConfig, testServerConnection, validateServerUrl } from '@/config';
 import { 
   getDefaultCameraCredentials, 
@@ -536,7 +537,7 @@ export function SettingsForm({
                           </Button>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-2">
                             <Label>Camera Name</Label>
                             <Input
@@ -553,6 +554,38 @@ export function SettingsForm({
                               value={camera.path}
                               onChange={(e) => updateCamera(camera.id, 'path', e.target.value)}
                             />
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label>Protocol</Label>
+                            <Select
+                              value={camera.protocol || 'auto'}
+                              onValueChange={(value) => updateCamera(camera.id, 'protocol', value as StreamingProtocol)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select protocol" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="auto">
+                                  <div className="flex items-center gap-2">
+                                    <span>Auto</span>
+                                    <span className="text-xs text-gray-500">(WebRTC → HLS)</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="webrtc">
+                                  <div className="flex items-center gap-2">
+                                    <span>WebRTC Only</span>
+                                    <span className="text-xs text-gray-500">(Low latency)</span>
+                                  </div>
+                                </SelectItem>
+                                <SelectItem value="hls">
+                                  <div className="flex items-center gap-2">
+                                    <span>HLS Only</span>
+                                    <span className="text-xs text-gray-500">(Better compatibility)</span>
+                                  </div>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
 
@@ -593,8 +626,12 @@ export function SettingsForm({
 
                         <Separator className="my-4" />
 
-                        <div className="text-xs text-gray-500">
-                          <p>WHEP URL: {config.serverUrl.replace(/\/$/, '')}/{camera.path}/whep</p>
+                        <div className="text-xs text-gray-500 space-y-1">
+                          <p><strong>WebRTC URL:</strong> {config.serverUrl.replace(/\/$/, '')}/{camera.path}/whep</p>
+                          <p><strong>HLS URL:</strong> {config.serverUrl.replace(':8889', ':8888').replace(/\/$/, '')}/{camera.path}/index.m3u8</p>
+                          <p className="text-blue-600 mt-2">
+                            💡 <strong>Auto mode</strong> tries WebRTC first for low latency, falls back to HLS if WebRTC fails
+                          </p>
                         </div>
                       </div>
                     ))}
