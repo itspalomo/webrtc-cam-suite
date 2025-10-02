@@ -10,7 +10,15 @@
     "lint:fix": "eslint --fix",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next out",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "test": "node tests/run-all-tests.mjs",
+    "test:auth": "node tests/e2e/auth-flow.test.mjs",
+    "test:viewer": "node tests/e2e/camera-viewer.test.mjs",
+    "test:settings": "node tests/e2e/settings.test.mjs",
+    "test:navigation": "node tests/e2e/navigation.test.mjs",
+    "test:controls": "node tests/e2e/player-controls.test.mjs",
+    "test:session": "node tests/e2e/session-management.test.mjs",
+    "test:headless": "HEADLESS=true node tests/run-all-tests.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
