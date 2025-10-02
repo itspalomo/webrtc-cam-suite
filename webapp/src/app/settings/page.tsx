@@ -4,7 +4,8 @@ import { Suspense } from 'react';
 import { AuthGate } from '@/components/layout/auth-gate';
 import { MainLayout } from '@/components/layout/main-layout';
 import { SettingsForm } from '@/components/forms/settings-form';
-import { loadConfig, saveConfig } from '@/config';
+import { saveConfig } from '@/config';
+import { AppConfig } from '@/types';
 import { toast } from 'sonner';
 
 /**

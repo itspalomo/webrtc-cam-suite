@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { isAuthenticated } from '@/lib/auth';
+import { hasSiteSession } from '@/lib/site-auth';
 import { Loader2 } from 'lucide-react';
 
 /**
- * AuthGate component that protects routes requiring authentication
- * Redirects unauthenticated users to the login page
+ * AuthGate - protects routes requiring website authentication
+ * Note: This checks SITE authentication, not camera credentials
  */
 interface AuthGateProps {
   children: React.ReactNode;
@@ -26,7 +26,9 @@ export function AuthGate({
 
   useEffect(() => {
     const checkAuth = () => {
-      const authenticated = isAuthenticated();
+      // Check if user has authenticated with the website
+      const authenticated = hasSiteSession();
+      
       setIsAuthed(authenticated);
       setIsChecking(false);
 
@@ -38,19 +40,17 @@ export function AuthGate({
     checkAuth();
   }, [router, redirectTo]);
 
-  // Show loading state while checking authentication
   if (isChecking) {
     return fallback || (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
-          <p className="text-gray-600">Checking authentication...</p>
+          <p className="text-gray-600">Verifying website authentication...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render children if not authenticated
   if (!isAuthed) {
     return null;
   }
@@ -85,7 +85,7 @@ export function useAuth() {
 
   useEffect(() => {
     const checkAuth = () => {
-      const authenticated = isAuthenticated();
+      const authenticated = hasSiteSession();
       setIsAuthed(authenticated);
       setIsLoading(false);
     };

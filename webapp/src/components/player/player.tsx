@@ -27,7 +27,7 @@ import {
   reconnectWhepSession,
   isWebRTCSupported
 } from '@/lib/whep';
-import { getCurrentCredentials } from '@/lib/auth';
+import { getCameraCredentials } from '@/lib/camera-auth';
 import { loadConfig } from '@/config';
 
 import { PlayerStatsHUD } from './player-stats-hud';
@@ -146,10 +146,10 @@ export function Player({
       setPlayerState('connecting');
       setError(null);
 
-      // Use camera-specific credentials if available, otherwise use global credentials
-      const credentials = camera.credentials || getCurrentCredentials();
+      // Get credentials for this camera (camera-specific or global defaults)
+      const credentials = getCameraCredentials(camera);
       if (!credentials) {
-        throw new Error('No authentication credentials available');
+        throw new Error('No camera credentials available. Please configure in Settings → Camera Auth');
       }
 
       const config = loadConfig();
@@ -183,9 +183,9 @@ export function Player({
       setPlayerState('reconnecting');
       setError(null);
 
-      const credentials = getCurrentCredentials();
+      const credentials = getCameraCredentials(camera);
       if (!credentials) {
-        throw new Error('No authentication credentials available');
+        throw new Error('No camera credentials available. Please configure in Settings → Camera Auth');
       }
 
       const config = loadConfig();
