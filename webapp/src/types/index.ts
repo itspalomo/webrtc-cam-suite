@@ -14,7 +14,7 @@ export interface Credentials {
 export interface Camera {
   id: string;
   name: string;
-  path: string; // MediaMTX stream path (e.g., "nursery", "playroom")
+  path: string; // MediaMTX stream path (e.g., "camera1", "camera2")
   lastSeen?: Date;
   status: CameraStatus;
   thumbnail?: string; // Optional thumbnail URL

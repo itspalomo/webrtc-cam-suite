@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# MediaMTX Update Script for Baby Monitor
+# MediaMTX Update Script for Camera Suite
 # This script updates MediaMTX to the latest version
 
 set -e

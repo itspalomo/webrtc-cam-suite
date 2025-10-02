@@ -1,6 +1,6 @@
-# Baby Monitor Architecture
+# Camera Suite Architecture
 
-This document describes the technical architecture of the baby monitor system.
+This document describes the technical architecture of the WebRTC Camera Suite.
 
 ## System Overview
 

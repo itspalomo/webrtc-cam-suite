@@ -14,17 +14,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BabyCam Viewer",
+  title: "Camera Suite Viewer",
   description: "Secure live streaming WebRTC viewer for MediaMTX cameras",
-  keywords: ["WebRTC", "MediaMTX", "baby monitor", "live streaming", "security camera"],
-  authors: [{ name: "BabyCam Team" }],
+  keywords: ["WebRTC", "MediaMTX", "camera monitoring", "live streaming", "security camera", "surveillance"],
+  authors: [{ name: "Camera Suite Team" }],
   manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: "BabyCam Viewer",
+    title: "Camera Suite Viewer",
     description: "Secure live streaming WebRTC viewer for MediaMTX cameras",
     type: "website",
   },

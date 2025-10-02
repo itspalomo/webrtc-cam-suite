@@ -113,15 +113,15 @@ export async function generateMetadata({ params }: ViewerPageProps) {
 
   if (!camera) {
     return {
-      title: 'Camera Not Found - BabyCam Viewer',
+      title: 'Camera Not Found - Camera Suite',
     };
   }
 
   return {
-    title: `${camera.name} - BabyCam Viewer`,
+    title: `${camera.name} - Camera Suite`,
     description: `Live stream of ${camera.name} camera using WebRTC WHEP protocol`,
     openGraph: {
-      title: `${camera.name} - BabyCam Viewer`,
+      title: `${camera.name} - Camera Suite`,
       description: `Live stream of ${camera.name} camera`,
       type: 'video.other',
     },

@@ -540,7 +540,7 @@ export function SettingsForm({
                           <div className="space-y-2">
                             <Label>Camera Name</Label>
                             <Input
-                              placeholder="e.g., Nursery"
+                              placeholder="e.g., Front Door"
                               value={camera.name}
                               onChange={(e) => updateCamera(camera.id, 'name', e.target.value)}
                             />
@@ -549,7 +549,7 @@ export function SettingsForm({
                           <div className="space-y-2">
                             <Label>Stream Path</Label>
                             <Input
-                              placeholder="e.g., nursery"
+                              placeholder="e.g., camera1"
                               value={camera.path}
                               onChange={(e) => updateCamera(camera.id, 'path', e.target.value)}
                             />

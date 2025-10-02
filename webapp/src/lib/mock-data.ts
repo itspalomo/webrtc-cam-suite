@@ -7,39 +7,39 @@ import { Camera, Credentials, AppConfig, StreamStats } from '@/types';
 
 // Mock credentials for testing
 export const MOCK_CREDENTIALS: Credentials = {
-  username: 'baby',
-  password: 'monitor123',
+  username: 'admin',
+  password: 'changeme',
 };
 
 // Mock cameras with different states
 export const MOCK_CAMERAS: Camera[] = [
   {
-    id: 'nursery',
-    name: 'Nursery',
-    path: 'nursery',
+    id: 'camera1',
+    name: 'Front Door',
+    path: 'camera1',
     status: 'online',
     lastSeen: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
     thumbnail: 'https://placekitten.com/320/180', // Placeholder image
   },
   {
-    id: 'playroom',
-    name: 'Playroom',
-    path: 'playroom',
+    id: 'camera2',
+    name: 'Backyard',
+    path: 'camera2',
     status: 'online',
     lastSeen: new Date(Date.now() - 2 * 60 * 1000), // 2 minutes ago
     thumbnail: 'https://placekitten.com/321/180', // Different placeholder
   },
   {
-    id: 'kitchen',
-    name: 'Kitchen',
-    path: 'kitchen',
+    id: 'camera3',
+    name: 'Garage',
+    path: 'camera3',
     status: 'offline',
     lastSeen: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
   },
   {
-    id: 'backyard',
-    name: 'Backyard',
-    path: 'backyard',
+    id: 'camera4',
+    name: 'Office',
+    path: 'camera4',
     status: 'unknown',
     lastSeen: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
   },
@@ -82,7 +82,7 @@ export const MOCK_ERRORS = {
 export const EMPTY_STATES = {
   NO_CAMERAS: {
     title: 'No Cameras Configured',
-    description: 'Add your first camera in Settings to start monitoring.',
+    description: 'Add your first camera in Settings to start viewing.',
     actionText: 'Go to Settings',
   },
   NO_STREAM: {
@@ -100,12 +100,12 @@ export const EMPTY_STATES = {
 export const CONFIG_TEMPLATES = {
   LAN_SETUP: {
     serverUrl: 'http://192.168.1.100:8889',
-    cameras: ['nursery', 'playroom'],
+    cameras: ['camera1', 'camera2'],
     iceServers: ['stun:stun.l.google.com:19302'],
   },
   REMOTE_SETUP: {
-    serverUrl: 'https://babycam.example.com:8889',
-    cameras: ['nursery', 'playroom', 'kitchen'],
+    serverUrl: 'https://camsuite.example.com:8889',
+    cameras: ['camera1', 'camera2', 'camera3'],
     iceServers: [
       'stun:stun.l.google.com:19302',
       'turn:turn.example.com:3478?transport=udp',

@@ -1,6 +1,6 @@
 {
-  "name": "BabyCam Viewer",
-  "short_name": "BabyCam",
+  "name": "Camera Suite Viewer",
+  "short_name": "CamSuite",
   "description": "Secure live streaming WebRTC viewer for MediaMTX cameras",
   "start_url": "/",
   "display": "standalone",
