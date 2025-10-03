@@ -422,13 +422,14 @@ export function SettingsForm({
   const validation = validateForm();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={className}
-    >
-      <div className="space-y-6">
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className={className}
+      >
+        <div className="space-y-6">
         {/* Validation errors */}
         {validationErrors.length > 0 && (
           <Alert variant="destructive">
@@ -549,16 +550,14 @@ export function SettingsForm({
                     <CardTitle className="flex items-center gap-2">
                       <Key className="h-5 w-5" />
                       Default Camera Credentials
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-xs">
-                            <p>These credentials match the <code>readUser</code> and <code>readPass</code> in your MediaMTX <code>pathDefaults</code> configuration.</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>These credentials match the <code>readUser</code> and <code>readPass</code> in your MediaMTX <code>pathDefaults</code> configuration.</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </CardTitle>
                     <CardDescription>
                       Applied to all cameras unless overridden below
@@ -1030,6 +1029,7 @@ export function SettingsForm({
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </TooltipProvider>
   );
 }
