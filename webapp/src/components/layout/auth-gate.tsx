@@ -25,14 +25,21 @@ export function AuthGate({
   const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
-    const checkAuth = () => {
-      // Check if user has authenticated with the website
-      const authenticated = hasSiteSession();
-      
-      setIsAuthed(authenticated);
-      setIsChecking(false);
+    const checkAuth = async () => {
+      try {
+        // Check if user has authenticated with the website
+        const authenticated = await hasSiteSession();
+        
+        setIsAuthed(authenticated);
+        setIsChecking(false);
 
-      if (!authenticated) {
+        if (!authenticated) {
+          router.push(redirectTo);
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthed(false);
+        setIsChecking(false);
         router.push(redirectTo);
       }
     };
@@ -84,10 +91,16 @@ export function useAuth() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
-      const authenticated = hasSiteSession();
-      setIsAuthed(authenticated);
-      setIsLoading(false);
+    const checkAuth = async () => {
+      try {
+        const authenticated = await hasSiteSession();
+        setIsAuthed(authenticated);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthed(false);
+        setIsLoading(false);
+      }
     };
 
     checkAuth();

@@ -11,8 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-import { validateSiteLogin, createSiteSession } from '@/lib/site-auth';
-import { checkLoginLockout, recordFailedLogin, resetRateLimit, formatRemainingTime } from '@/lib/site-auth/rate-limit';
+import { formatRemainingTime } from '@/lib/site-auth/rate-limit';
 
 /**
  * LoginForm component for site authentication
@@ -38,14 +37,7 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
     e.preventDefault();
     setError(null);
     setShowDefaultWarning(false);
-
-    // Check for lockout
-    const lockout = checkLoginLockout();
-    if (lockout.isLocked) {
-      setLockoutInfo(lockout);
-      setError(`Too many failed attempts. Please wait ${formatRemainingTime(lockout.remainingTime || 0)} before trying again.`);
-      return;
-    }
+    setLockoutInfo(null);
 
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password');
@@ -55,32 +47,37 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
     setIsLoading(true);
 
     try {
-      const result = validateSiteLogin(username, password);
+      // Call the login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Important: include cookies
+        body: JSON.stringify({ username, password }),
+      });
+
+      const result = await response.json();
 
       if (!result.success) {
-        // Record failed attempt and check for lockout
-        const rateLimitResult = recordFailedLogin();
-        
-        if (rateLimitResult.isLocked) {
-          setLockoutInfo({ isLocked: true, remainingTime: rateLimitResult.remainingTime });
-          setError(`Too many failed attempts (${rateLimitResult.attempts}/${5}). Account locked for ${formatRemainingTime(rateLimitResult.remainingTime || 0)}.`);
-        } else {
-          const remainingAttempts = 5 - rateLimitResult.attempts;
+        // Handle failed login
+        if (result.isLocked) {
+          setLockoutInfo({ isLocked: true, remainingTime: result.remainingTime });
+          setError(`Too many failed attempts (${result.attempts}/${5}). Account locked for ${formatRemainingTime(result.remainingTime || 0)}.`);
+        } else if (result.attempts !== undefined) {
+          const remainingAttempts = 5 - result.attempts;
           setError(`${result.message || 'Invalid credentials'}. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`);
+        } else {
+          setError(result.message || 'Invalid credentials');
         }
         
         setIsLoading(false);
         return;
       }
 
-      // Success - reset rate limit and create session
-      resetRateLimit();
-      createSiteSession();
-
-      // Show warning if using default credentials
+      // Success - show warning if using default credentials
       if (result.isDefaultCredentials) {
         setShowDefaultWarning(true);
-        // Still allow login, but show warning
       }
 
       // Redirect after brief delay to show warning if needed
@@ -94,7 +91,7 @@ export function LoginForm({ onSuccess, redirectTo = '/' }: LoginFormProps) {
 
     } catch (err) {
       console.error('Login error:', err);
-      setError('An unexpected error occurred');
+      setError('An unexpected error occurred. Please try again.');
       setIsLoading(false);
     }
   };
