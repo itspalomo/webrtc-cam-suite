@@ -108,9 +108,18 @@ export function validateSiteLogin(
 /**
  * Clear site authentication (logout)
  */
-export function clearSiteAuth(): void {
-  // Note: We don't clear the stored credentials, just the session
-  // This allows the same credentials to be used on next login
+export async function clearSiteAuth(): Promise<void> {
+  // Call the logout API to clear HTTP-only cookies
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+  
+  // Also clear legacy sessionStorage if it exists
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('site_authenticated');
     sessionStorage.removeItem(LAST_ACTIVITY_KEY);
@@ -155,34 +164,33 @@ export function isSessionTimedOut(): boolean {
 }
 
 /**
- * Check if user has an active site session
+ * Check if user has an active site session (client-side check)
+ * NOTE: This is a quick client-side check. The real validation happens on the server.
+ * The middleware will verify the HTTP-only cookies on every request.
  */
-export function hasSiteSession(): boolean {
+export async function hasSiteSession(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   
-  const isAuthenticated = sessionStorage.getItem('site_authenticated') === 'true';
-  
-  if (!isAuthenticated) return false;
-  
-  // Check for timeout
-  if (isSessionTimedOut()) {
-    clearSiteAuth();
+  try {
+    const response = await fetch('/api/auth/session', {
+      method: 'GET',
+      credentials: 'include', // Important: include cookies
+    });
+    
+    const data = await response.json();
+    return data.authenticated === true;
+  } catch {
     return false;
   }
-  
-  // Update last activity on check
-  updateLastActivity();
-  
-  return true;
 }
 
 /**
- * Create a site session (called after successful login)
+ * Create a site session (called after successful login via API)
+ * @deprecated Use the /api/auth/login endpoint instead
  */
 export function createSiteSession(): void {
-  if (typeof window === 'undefined') return;
-  sessionStorage.setItem('site_authenticated', 'true');
-  updateLastActivity();
+  // This is now handled by the API route which sets HTTP-only cookies
+  console.warn('createSiteSession is deprecated. Use /api/auth/login instead.');
 }
 
 /**

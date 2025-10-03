@@ -16,17 +16,22 @@ export default function LoginPage() {
   const [showDefaultCredsNotice, setShowDefaultCredsNotice] = useState(false);
 
   useEffect(() => {
-    // Redirect if already authenticated
-    if (hasSiteSession()) {
-      router.push('/');
-      return;
-    }
+    const checkSession = async () => {
+      // Redirect if already authenticated
+      const hasSession = await hasSiteSession();
+      if (hasSession) {
+        router.push('/');
+        return;
+      }
 
-    // Show notice about default credentials on first launch
-    const config = getSiteAuthConfig();
-    if (config.isFirstLaunch) {
-      setShowDefaultCredsNotice(true);
-    }
+      // Show notice about default credentials on first launch
+      const config = getSiteAuthConfig();
+      if (config.isFirstLaunch) {
+        setShowDefaultCredsNotice(true);
+      }
+    };
+
+    checkSession();
   }, [router]);
 
   return (

@@ -54,8 +54,8 @@ export function MainLayout({
 }: MainLayoutProps) {
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    clearSiteAuth();
+  const handleLogout = async () => {
+    await clearSiteAuth();
     // Clear session and redirect to login
     window.location.href = '/login';
   };
