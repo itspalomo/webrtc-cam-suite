@@ -412,10 +412,9 @@ export function SettingsForm({
         )}
 
         <Tabs defaultValue="server" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="server">Server</TabsTrigger>
             <TabsTrigger value="cameras">Cameras</TabsTrigger>
-            <TabsTrigger value="camera-auth">Camera Auth</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="playback">Playback</TabsTrigger>
           </TabsList>
@@ -496,6 +495,77 @@ export function SettingsForm({
 
           {/* Camera Management */}
           <TabsContent value="cameras" className="space-y-4">
+            {/* Default Camera Credentials Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  Default Camera Credentials
+                </CardTitle>
+                <CardDescription>
+                  These credentials will be used for all cameras that don&apos;t have specific credentials configured.
+                  They are sent to your MediaMTX server when connecting to camera streams.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert className="bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-900">
+                    <strong>What are camera credentials?</strong>
+                    <br />
+                    These username/password are sent to your MediaMTX server when connecting
+                    to camera streams. They are NOT the same as your website login.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="camera-username">MediaMTX Username</Label>
+                    <Input
+                      id="camera-username"
+                      placeholder="e.g., camuser"
+                      value={defaultCameraUsername}
+                      onChange={(e) => setDefaultCameraUsername(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="camera-password">MediaMTX Password</Label>
+                    <Input
+                      id="camera-password"
+                      type="password"
+                      placeholder="MediaMTX password"
+                      value={defaultCameraPassword}
+                      onChange={(e) => setDefaultCameraPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={testDefaultCameraCredentials}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Wifi className="h-4 w-4 mr-2" />
+                  Test Credentials Against Server
+                </Button>
+
+                {cameraTestResult && (
+                  <Alert variant={cameraTestResult.success ? "default" : "destructive"}>
+                    {cameraTestResult.success ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4" />
+                    )}
+                    <AlertDescription>
+                      {cameraTestResult.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Individual Camera Configuration */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -590,9 +660,9 @@ export function SettingsForm({
                         </div>
 
                         <div className="mt-4">
-                          <Label className="text-sm font-medium">Camera-Specific Credentials (Optional)</Label>
+                          <Label className="text-sm font-medium">Override Default Credentials (Optional)</Label>
                           <p className="text-xs text-gray-500 mb-3">
-                            Leave empty to use global credentials. Set these to use different credentials for this camera.
+                            Leave empty to use the default credentials above. Set these to use different credentials for this specific camera.
                           </p>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -641,107 +711,6 @@ export function SettingsForm({
             </Card>
           </TabsContent>
 
-          {/* Camera Authentication Tab */}
-          <TabsContent value="camera-auth" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Key className="h-5 w-5" />
-                  Camera Authentication
-                </CardTitle>
-                <CardDescription>
-                  Configure default credentials for accessing camera streams via MediaMTX.
-                  These are separate from your website login.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Security Warning */}
-                <CredentialSecurityWarning />
-
-                <Alert className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-sm text-blue-900">
-                    <strong>What are camera credentials?</strong>
-                    <br />
-                    These username/password are sent to your MediaMTX server when connecting
-                    to camera streams. They are NOT the same as your website login.
-                    <br /><br />
-                    You can set:
-                    <ul className="list-disc ml-5 mt-2 space-y-1">
-                      <li><strong>Global defaults</strong> - used for all cameras unless overridden</li>
-                      <li><strong>Per-camera credentials</strong> - specific to each camera (set in Cameras tab)</li>
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-
-                <Separator />
-
-                <div>
-                  <Label className="text-base font-semibold">Default Camera Credentials</Label>
-                  <p className="text-sm text-gray-500 mb-4">
-                    These credentials will be used for all cameras that don&apos;t have specific credentials configured.
-                  </p>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="camera-username">MediaMTX Username</Label>
-                      <Input
-                        id="camera-username"
-                        placeholder="e.g., camuser"
-                        value={defaultCameraUsername}
-                        onChange={(e) => setDefaultCameraUsername(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="camera-password">MediaMTX Password</Label>
-                      <Input
-                        id="camera-password"
-                        type="password"
-                        placeholder="MediaMTX password"
-                        value={defaultCameraPassword}
-                        onChange={(e) => setDefaultCameraPassword(e.target.value)}
-                      />
-                    </div>
-
-                    <Button
-                      onClick={testDefaultCameraCredentials}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Wifi className="h-4 w-4 mr-2" />
-                      Test Credentials Against Server
-                    </Button>
-
-                    {cameraTestResult && (
-                      <Alert variant={cameraTestResult.success ? "default" : "destructive"}>
-                        {cameraTestResult.success ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4" />
-                        )}
-                        <AlertDescription>
-                          {cameraTestResult.message}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                  <p className="font-medium text-gray-900">Security Best Practices:</p>
-                  <ul className="list-disc ml-5 space-y-1 text-gray-600">
-                    <li>Use different credentials for website login vs. camera access</li>
-                    <li>Set per-camera credentials for cameras requiring different access levels</li>
-                    <li>Rotate camera credentials regularly on your MediaMTX server</li>
-                    <li>Never share camera credentials publicly or in screenshots</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Account Security Tab */}
           <TabsContent value="account" className="space-y-4">

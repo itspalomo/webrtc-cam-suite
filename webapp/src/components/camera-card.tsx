@@ -92,6 +92,7 @@ export function CameraCard({ camera, className = '' }: CameraCardProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.2 }}
       className={className}
+      data-testid="camera-card"
     >
       <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
         {/* Camera thumbnail */}

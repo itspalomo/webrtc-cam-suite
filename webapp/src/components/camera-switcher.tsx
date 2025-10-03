@@ -130,7 +130,7 @@ export function CameraSwitcher({
   // Compact version - just navigation arrows
   if (compact) {
     return (
-      <div className={`flex items-center space-x-2 ${className}`}>
+      <div className={`flex items-center space-x-2 ${className}`} data-testid="camera-switcher">
         <Button
           variant="outline"
           size="sm"
@@ -164,7 +164,7 @@ export function CameraSwitcher({
 
   // Full version with dropdown
   return (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center space-x-2 ${className}`} data-testid="camera-switcher">
       {/* Previous camera button */}
       <Button
         variant="outline"
@@ -174,6 +174,7 @@ export function CameraSwitcher({
           if (prev) window.location.href = `/viewer/${prev.id}`;
         }}
         className="p-2"
+        aria-label="Previous camera"
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>
@@ -307,6 +308,7 @@ export function CameraSwitcher({
           if (next) window.location.href = `/viewer/${next.id}`;
         }}
         className="p-2"
+        aria-label="Next camera"
       >
         <ChevronRight className="h-4 w-4" />
       </Button>

@@ -148,8 +148,16 @@ export function Player({
 
       // Get credentials for this camera (camera-specific or global defaults)
       const credentials = getCameraCredentials(camera);
+      
+      // Debug logging
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Player] Camera object:', camera);
+        console.log('[Player] Camera credentials:', camera.credentials);
+        console.log('[Player] Resolved credentials:', credentials);
+      }
+      
       if (!credentials) {
-        throw new Error('No camera credentials available. Please configure in Settings → Camera Auth');
+        throw new Error('No camera credentials available. Please configure in Settings → Cameras');
       }
 
       const config = loadConfig();
@@ -174,7 +182,7 @@ export function Player({
       setPlayerState('failed');
       onError?.(errorMsg);
     }
-  }, [camera.path, onError]);
+  }, [camera, onError]);
 
   const reconnectStream = useCallback(async () => {
     if (!whepSession) return;
@@ -351,12 +359,13 @@ export function Player({
   }
 
   return (
-    <div className={`relative group ${className}`}>
+    <div className={`relative group ${className}`} data-testid="video-player">
       {/* Video element */}
       <video
         ref={videoRef}
         className="w-full h-full bg-black rounded-lg"
         playsInline
+        data-testid="video-element"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onError={(e) => {
@@ -393,6 +402,7 @@ export function Player({
               size="sm"
               onClick={handlePlayPause}
               className="text-white hover:bg-white/20"
+              aria-label={isPlaying ? "Pause video" : "Play video"}
             >
               {isPlaying ? (
                 <Pause className="h-4 w-4" />
@@ -406,6 +416,7 @@ export function Player({
               size="sm"
               onClick={handleMute}
               className="text-white hover:bg-white/20"
+              aria-label={isMuted ? "Unmute video" : "Mute video"}
             >
               {isMuted ? (
                 <VolumeX className="h-4 w-4" />
@@ -443,6 +454,7 @@ export function Player({
               size="sm"
               onClick={handleFullscreen}
               className="text-white hover:bg-white/20"
+              aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             >
               {isFullscreen ? (
                 <Minimize className="h-4 w-4" />
