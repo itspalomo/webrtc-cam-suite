@@ -176,6 +176,7 @@ export function PlayerStatsHUD({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
       className={className}
+      data-testid="stats-hud"
     >
       <Card className="bg-black/80 backdrop-blur-sm border-gray-700 text-white min-w-[200px]">
         <div className="p-3">

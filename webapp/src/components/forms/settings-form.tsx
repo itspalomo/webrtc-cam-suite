@@ -18,7 +18,11 @@ import {
   Key,
   Shield,
   Lock,
-  Info
+  Info,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  HelpCircle
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -31,6 +35,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 import { AppConfig, Camera as CameraType, ValidationResult, Credentials, StreamingProtocol } from '@/types';
 import { loadConfig, saveConfig, testServerConnection, validateServerUrl } from '@/config';
@@ -83,6 +90,45 @@ export function SettingsForm({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [usingDefaultCredentials, setUsingDefaultCredentials] = useState(false);
+
+  // Camera advanced sections state
+  const [expandedCameras, setExpandedCameras] = useState<Set<string>>(new Set());
+
+  // Helper function to count cameras using default credentials
+  const camerasUsingDefaults = config?.cameras.filter(cam => 
+    !cam.credentials || (!cam.credentials.username && !cam.credentials.password)
+  ) || [];
+
+  // Helper to toggle camera advanced section
+  const toggleCameraAdvanced = (cameraId: string) => {
+    setExpandedCameras(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cameraId)) {
+        newSet.delete(cameraId);
+      } else {
+        newSet.add(cameraId);
+      }
+      return newSet;
+    });
+  };
+
+  // Helper to copy default credentials to camera
+  const copyDefaultsToCamera = (cameraId: string) => {
+    if (defaultCameraUsername && defaultCameraPassword) {
+      updateCameraCredentials(cameraId, 'username', defaultCameraUsername);
+      updateCameraCredentials(cameraId, 'password', defaultCameraPassword);
+      toast.success('Default credentials copied to camera');
+    } else {
+      toast.error('Please set default credentials first');
+    }
+  };
+
+  // Helper to clear camera credentials
+  const clearCameraCredentials = (cameraId: string) => {
+    updateCameraCredentials(cameraId, 'username', '');
+    updateCameraCredentials(cameraId, 'password', '');
+    toast.success('Camera credentials cleared - will use defaults');
+  };
 
   // Load initial config and auth state
   useEffect(() => {
@@ -376,13 +422,14 @@ export function SettingsForm({
   const validation = validateForm();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={className}
-    >
-      <div className="space-y-6">
+    <TooltipProvider>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className={className}
+      >
+        <div className="space-y-6">
         {/* Validation errors */}
         {validationErrors.length > 0 && (
           <Alert variant="destructive">
@@ -412,10 +459,9 @@ export function SettingsForm({
         )}
 
         <Tabs defaultValue="server" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="server">Server</TabsTrigger>
             <TabsTrigger value="cameras">Cameras</TabsTrigger>
-            <TabsTrigger value="camera-auth">Camera Auth</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
             <TabsTrigger value="playback">Playback</TabsTrigger>
           </TabsList>
@@ -496,6 +542,116 @@ export function SettingsForm({
 
           {/* Camera Management */}
           <TabsContent value="cameras" className="space-y-4">
+            {/* Default Camera Credentials Section */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Key className="h-5 w-5" />
+                      Default Camera Credentials
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p>These credentials match the <code>readUser</code> and <code>readPass</code> in your MediaMTX <code>pathDefaults</code> configuration.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </CardTitle>
+                    <CardDescription>
+                      Applied to all cameras unless overridden below
+                    </CardDescription>
+                  </div>
+                  {camerasUsingDefaults.length > 0 && (
+                    <Badge variant="outline" className="text-sm">
+                      {camerasUsingDefaults.length} {camerasUsingDefaults.length === 1 ? 'camera' : 'cameras'} using
+                    </Badge>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert className="bg-blue-50 border-blue-200">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <AlertDescription className="text-sm text-blue-900">
+                    <strong>What are camera credentials?</strong>
+                    <br />
+                    These username/password are sent to your MediaMTX server when connecting
+                    to camera streams. They are NOT the same as your website login.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="camera-username">MediaMTX Username</Label>
+                    <Input
+                      id="camera-username"
+                      placeholder="e.g., camuser"
+                      value={defaultCameraUsername}
+                      onChange={(e) => setDefaultCameraUsername(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="camera-password">MediaMTX Password</Label>
+                    <Input
+                      id="camera-password"
+                      type="password"
+                      placeholder="MediaMTX password"
+                      value={defaultCameraPassword}
+                      onChange={(e) => setDefaultCameraPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <Button
+                  onClick={testDefaultCameraCredentials}
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Wifi className="h-4 w-4 mr-2" />
+                  Test Credentials Against Server
+                </Button>
+
+                {cameraTestResult && (
+                  <Alert variant={cameraTestResult.success ? "default" : "destructive"}>
+                    {cameraTestResult.success ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4" />
+                    )}
+                    <AlertDescription>
+                      {cameraTestResult.message}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Usage List */}
+                {camerasUsingDefaults.length > 0 && (
+                  <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <p className="text-sm font-medium text-gray-700">Currently used by:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {camerasUsingDefaults.map(cam => (
+                        <Badge key={cam.id} variant="secondary" className="text-xs">
+                          {cam.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {camerasUsingDefaults.length === 0 && config && config.cameras.length > 0 && (
+                  <Alert className="bg-yellow-50 border-yellow-200">
+                    <AlertCircle className="h-4 w-4 text-yellow-600" />
+                    <AlertDescription className="text-sm text-yellow-900">
+                      All cameras have custom credentials. These defaults won&apos;t be used unless you clear camera-specific credentials.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Individual Camera Configuration */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -523,19 +679,36 @@ export function SettingsForm({
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {config.cameras.map((camera, index) => (
-                      <div key={camera.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-medium">Camera {index + 1}</h4>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeCamera(camera.id)}
-                            className="text-red-600 hover:text-red-700"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    {config.cameras.map((camera, index) => {
+                      const hasCustomCreds = camera.credentials?.username && camera.credentials?.password;
+                      const isExpanded = expandedCameras.has(camera.id);
+                      
+                      return (
+                        <div key={camera.id} className="border rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium">{camera.name || `Camera ${index + 1}`}</h4>
+                              {hasCustomCreds ? (
+                                <Badge variant="default" className="text-xs bg-blue-600">
+                                  <Key className="h-3 w-3 mr-1" />
+                                  Custom
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs border-green-300 text-green-700">
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Using defaults
+                                </Badge>
+                              )}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeCamera(camera.id)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="space-y-2">
@@ -589,40 +762,82 @@ export function SettingsForm({
                           </div>
                         </div>
 
-                        <div className="mt-4">
-                          <Label className="text-sm font-medium">Camera-Specific Credentials (Optional)</Label>
-                          <p className="text-xs text-gray-500 mb-3">
-                            Leave empty to use global credentials. Set these to use different credentials for this camera.
-                          </p>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label className="text-sm">Username</Label>
-                              <Input
-                                placeholder="Camera username"
-                                value={camera.credentials?.username || ''}
-                                onChange={(e) => updateCameraCredentials(camera.id, 'username', e.target.value)}
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-sm">Password</Label>
-                              <Input
-                                type="password"
-                                placeholder="Camera password"
-                                value={camera.credentials?.password || ''}
-                                onChange={(e) => updateCameraCredentials(camera.id, 'password', e.target.value)}
-                              />
-                            </div>
+                        {/* Advanced: Custom Credentials */}
+                        <Collapsible 
+                          open={isExpanded}
+                          onOpenChange={() => toggleCameraAdvanced(camera.id)}
+                          className="mt-4"
+                        >
+                          <div className="flex items-center justify-between">
+                            <CollapsibleTrigger asChild>
+                              <Button variant="ghost" size="sm" className="p-0 h-auto font-normal">
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4 mr-2" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 mr-2" />
+                                )}
+                                <span className="text-sm font-medium">Advanced: Custom Credentials</span>
+                              </Button>
+                            </CollapsibleTrigger>
+                            {hasCustomCreds && !isExpanded && (
+                              <span className="text-xs text-blue-600">Configured</span>
+                            )}
                           </div>
+                          
+                          <CollapsibleContent className="mt-3">
+                            <div className="space-y-4 border-l-2 border-gray-200 pl-4">
+                              <p className="text-xs text-gray-500">
+                                Override the default credentials for this specific camera. Leave empty to use defaults.
+                              </p>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Username</Label>
+                                  <Input
+                                    placeholder="Camera username"
+                                    value={camera.credentials?.username || ''}
+                                    onChange={(e) => updateCameraCredentials(camera.id, 'username', e.target.value)}
+                                  />
+                                </div>
 
-                          {camera.credentials?.username && camera.credentials?.password && (
-                            <div className="mt-2 flex items-center space-x-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-xs text-green-600">Custom credentials configured</span>
+                                <div className="space-y-2">
+                                  <Label className="text-sm">Password</Label>
+                                  <Input
+                                    type="password"
+                                    placeholder="Camera password"
+                                    value={camera.credentials?.password || ''}
+                                    onChange={(e) => updateCameraCredentials(camera.id, 'password', e.target.value)}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Helper Buttons */}
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => copyDefaultsToCamera(camera.id)}
+                                  disabled={!defaultCameraUsername || !defaultCameraPassword}
+                                >
+                                  <Copy className="h-3 w-3 mr-1" />
+                                  Copy from defaults
+                                </Button>
+                                {hasCustomCreds && (
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => clearCameraCredentials(camera.id)}
+                                  >
+                                    <XCircle className="h-3 w-3 mr-1" />
+                                    Clear
+                                  </Button>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </CollapsibleContent>
+                        </Collapsible>
 
                         <Separator className="my-4" />
 
@@ -634,114 +849,14 @@ export function SettingsForm({
                           </p>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Camera Authentication Tab */}
-          <TabsContent value="camera-auth" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Key className="h-5 w-5" />
-                  Camera Authentication
-                </CardTitle>
-                <CardDescription>
-                  Configure default credentials for accessing camera streams via MediaMTX.
-                  These are separate from your website login.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Security Warning */}
-                <CredentialSecurityWarning />
-
-                <Alert className="bg-blue-50 border-blue-200">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <AlertDescription className="text-sm text-blue-900">
-                    <strong>What are camera credentials?</strong>
-                    <br />
-                    These username/password are sent to your MediaMTX server when connecting
-                    to camera streams. They are NOT the same as your website login.
-                    <br /><br />
-                    You can set:
-                    <ul className="list-disc ml-5 mt-2 space-y-1">
-                      <li><strong>Global defaults</strong> - used for all cameras unless overridden</li>
-                      <li><strong>Per-camera credentials</strong> - specific to each camera (set in Cameras tab)</li>
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-
-                <Separator />
-
-                <div>
-                  <Label className="text-base font-semibold">Default Camera Credentials</Label>
-                  <p className="text-sm text-gray-500 mb-4">
-                    These credentials will be used for all cameras that don&apos;t have specific credentials configured.
-                  </p>
-
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="camera-username">MediaMTX Username</Label>
-                      <Input
-                        id="camera-username"
-                        placeholder="e.g., camuser"
-                        value={defaultCameraUsername}
-                        onChange={(e) => setDefaultCameraUsername(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="camera-password">MediaMTX Password</Label>
-                      <Input
-                        id="camera-password"
-                        type="password"
-                        placeholder="MediaMTX password"
-                        value={defaultCameraPassword}
-                        onChange={(e) => setDefaultCameraPassword(e.target.value)}
-                      />
-                    </div>
-
-                    <Button
-                      onClick={testDefaultCameraCredentials}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <Wifi className="h-4 w-4 mr-2" />
-                      Test Credentials Against Server
-                    </Button>
-
-                    {cameraTestResult && (
-                      <Alert variant={cameraTestResult.success ? "default" : "destructive"}>
-                        {cameraTestResult.success ? (
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <XCircle className="h-4 w-4" />
-                        )}
-                        <AlertDescription>
-                          {cameraTestResult.message}
-                        </AlertDescription>
-                      </Alert>
-                    )}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
-                  <p className="font-medium text-gray-900">Security Best Practices:</p>
-                  <ul className="list-disc ml-5 space-y-1 text-gray-600">
-                    <li>Use different credentials for website login vs. camera access</li>
-                    <li>Set per-camera credentials for cameras requiring different access levels</li>
-                    <li>Rotate camera credentials regularly on your MediaMTX server</li>
-                    <li>Never share camera credentials publicly or in screenshots</li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           {/* Account Security Tab */}
           <TabsContent value="account" className="space-y-4">
@@ -914,6 +1029,7 @@ export function SettingsForm({
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </TooltipProvider>
   );
 }

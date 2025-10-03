@@ -392,8 +392,8 @@ async function runTests() {
   
   await sleep(1000); // Wait between tests
 
-  // Test 10: Camera Auth Tab Visibility
-  console.log('Test 10: Camera Authentication Tab in Settings');
+  // Test 10: Cameras Tab with Integrated Authentication
+  console.log('Test 10: Cameras Tab with Integrated Authentication');
   let browser10;
   try {
     const { browser, context, page } = await setupBrowser();
@@ -410,38 +410,38 @@ async function runTests() {
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
     
-    // Check for Camera Auth tab (use role selector)
-    const cameraAuthTab = await page.getByRole('tab', { name: 'Camera Auth' }).isVisible();
+    // Check for Cameras tab (consolidated with auth)
+    const camerasTab = await page.getByRole('tab', { name: 'Cameras' }).isVisible();
     
-    if (cameraAuthTab) {
+    if (camerasTab) {
       // Click the tab
-      await page.getByRole('tab', { name: 'Camera Auth' }).click();
+      await page.getByRole('tab', { name: 'Cameras' }).click();
       await sleep(1000);
       
-      // Check for camera auth content
-      const cameraAuthContent = await page.locator('text=Camera Authentication').isVisible();
-      const usernameField = await page.locator('#camera-username').isVisible();
+      // Check for camera auth content in Cameras tab
+      const defaultCredsSection = await page.locator('text=Default Camera Credentials').isVisible();
+      const usernameLabel = await page.locator('text=MediaMTX Username').isVisible();
       
-      if (cameraAuthContent && usernameField) {
-        console.log('✅ PASSED: Camera authentication tab accessible and functional\n');
+      if (defaultCredsSection && usernameLabel) {
+        console.log('✅ PASSED: Cameras tab with integrated authentication accessible\n');
         testResults.passed++;
-        testResults.tests.push({ name: 'Camera Auth Tab', status: 'passed' });
+        testResults.tests.push({ name: 'Cameras Tab with Auth', status: 'passed' });
       } else {
-        console.log('❌ FAILED: Camera auth tab content not displayed\n');
+        console.log('❌ FAILED: Camera authentication content not found in Cameras tab\n');
         testResults.failed++;
-        testResults.tests.push({ name: 'Camera Auth Tab', status: 'failed' });
+        testResults.tests.push({ name: 'Cameras Tab with Auth', status: 'failed' });
       }
     } else {
-      console.log('❌ FAILED: Camera auth tab not found\n');
+      console.log('❌ FAILED: Cameras tab not found\n');
       testResults.failed++;
-      testResults.tests.push({ name: 'Camera Auth Tab', status: 'failed' });
+      testResults.tests.push({ name: 'Cameras Tab with Auth', status: 'failed' });
     }
     
     await browser10.close();
   } catch (error) {
     console.log(`❌ FAILED: ${error.message}\n`);
     testResults.failed++;
-    testResults.tests.push({ name: 'Camera Auth Tab', status: 'failed', error: error.message });
+    testResults.tests.push({ name: 'Cameras Tab with Auth', status: 'failed', error: error.message });
     if (browser10) await browser10.close().catch(() => {});
   }
 

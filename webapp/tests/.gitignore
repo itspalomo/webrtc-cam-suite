@@ -1,0 +1,12 @@
+# Test artifacts
+screenshots/
+videos/
+*.log
+
+# Test results
+test-results/
+playwright-report/
+
+# Temporary files
+*.tmp
+.DS_Store
