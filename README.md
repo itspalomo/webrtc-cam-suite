@@ -31,6 +31,32 @@ webrtc-camera-suite/
 └── README.md            # This file
 ```
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Login & Authentication
+<img src="screenshots/01-login-page.png" alt="Secure login page with default credentials notice" width="800"/>
+
+*Secure login page with dual authentication system (site + camera credentials)*
+
+### Camera Grid
+<img src="screenshots/02-camera-grid.png" alt="Camera grid showing all available streams" width="800"/>
+
+*Modern camera grid interface with status indicators and quick access*
+
+### Settings - Server Configuration
+<img src="screenshots/03-settings-server.png" alt="Server settings with MediaMTX configuration" width="800"/>
+
+*Easy server configuration with MediaMTX and ICE server setup*
+
+### Settings - Account Security
+<img src="screenshots/04-settings-account.png" alt="Account security settings" width="800"/>
+
+*Account management with security warnings for default credentials*
+
+</div>
+
 ## 🚀 Features
 
 - **🔐 Secure Authentication**: HTTP Basic Auth with configurable credential storage
@@ -106,7 +132,10 @@ webrtc-camera-suite/
 - **[Complete Setup Guide](docs/SETUP.md)** - Step-by-step installation and configuration
 - **[System Architecture](docs/ARCHITECTURE.md)** - Technical details and design decisions  
 - **[API Reference](docs/API.md)** - MediaMTX API endpoints and usage examples
-- **[Raspberry Pi Config](rpi-config/README.md)** - Pi-specific setup and troubleshooting
+- **[Raspberry Pi Setup](rpi-config/README.md)** - Pi-specific setup and troubleshooting
+- **[Web App Quick Start](webapp/QUICK_START.md)** - First-time setup and authentication guide
+- **[Security Notes](webapp/SECURITY_NOTES.md)** - Security implementation details
+- **[Test Suite](webapp/tests/README.md)** - E2E testing documentation
 
 ## 🎯 Default Configuration
 
