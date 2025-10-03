@@ -106,7 +106,10 @@ webrtc-camera-suite/
 - **[Complete Setup Guide](docs/SETUP.md)** - Step-by-step installation and configuration
 - **[System Architecture](docs/ARCHITECTURE.md)** - Technical details and design decisions  
 - **[API Reference](docs/API.md)** - MediaMTX API endpoints and usage examples
-- **[Raspberry Pi Config](rpi-config/README.md)** - Pi-specific setup and troubleshooting
+- **[Raspberry Pi Setup](rpi-config/README.md)** - Pi-specific setup and troubleshooting
+- **[Web App Quick Start](webapp/QUICK_START.md)** - First-time setup and authentication guide
+- **[Security Notes](webapp/SECURITY_NOTES.md)** - Security implementation details
+- **[Test Suite](webapp/tests/README.md)** - E2E testing documentation
 
 ## 🎯 Default Configuration
 
