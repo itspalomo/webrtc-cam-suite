@@ -25,11 +25,12 @@ async function runTests() {
       await page.goto(`${baseUrl}/settings`);
       await waitForNetworkIdle(page);
       
-      // Check for tabs
-      const accountTab = await page.getByRole('tab', { name: /account/i }).isVisible().catch(() => false);
-      const cameraAuthTab = await page.getByRole('tab', { name: /camera auth/i }).isVisible().catch(() => false);
+      // Check for tabs (Server, Cameras, Account, Playback)
+      const serverTab = await page.getByRole('tab', { name: /^server$/i }).isVisible().catch(() => false);
+      const camerasTab = await page.getByRole('tab', { name: /^cameras$/i }).isVisible().catch(() => false);
+      const accountTab = await page.getByRole('tab', { name: /^account$/i }).isVisible().catch(() => false);
       
-      return accountTab && cameraAuthTab;
+      return serverTab && camerasTab && accountTab;
     } finally {
       await browser.close();
     }
@@ -118,9 +119,9 @@ async function runTests() {
     }
   }, results);
 
-  // Test 5: Camera Auth tab displays form
-  await runTest('Camera Auth tab displays form', async () => {
-    const { browser, context, page } = await setupBrowser(TEST_CONFIG.browser);
+  // Test 5: Cameras tab displays credential form
+  await runTest('Cameras tab displays integrated authentication form', async () => {
+    const { browser, context, page} = await setupBrowser(TEST_CONFIG.browser);
     
     try {
       await clearStorage(context, page, baseUrl);
@@ -129,22 +130,22 @@ async function runTests() {
       await page.goto(`${baseUrl}/settings`);
       await waitForNetworkIdle(page);
       
-      // Click Camera Auth tab
-      await page.getByRole('tab', { name: /camera auth/i }).click();
+      // Click Cameras tab
+      await page.getByRole('tab', { name: /^cameras$/i }).click();
       await sleep(500);
       
-      // Check for camera credential fields
-      const usernameField = await page.locator('#camera-username').isVisible().catch(() => false);
-      const passwordField = await page.locator('#camera-password').isVisible().catch(() => false);
+      // Check for default camera credential fields
+      const defaultCredsSection = await page.locator('text=Default Camera Credentials').isVisible().catch(() => false);
+      const usernameLabel = await page.locator('text=MediaMTX Username').isVisible().catch(() => false);
       
-      return usernameField && passwordField;
+      return defaultCredsSection && usernameLabel;
     } finally {
       await browser.close();
     }
   }, results);
 
-  // Test 6: Camera credentials remember checkbox
-  await runTest('Camera credentials remember checkbox works', async () => {
+  // Test 6: Camera configuration displays correctly
+  await runTest('Camera configuration section is accessible', async () => {
     const { browser, context, page } = await setupBrowser(TEST_CONFIG.browser);
     
     try {
@@ -154,22 +155,15 @@ async function runTests() {
       await page.goto(`${baseUrl}/settings`);
       await waitForNetworkIdle(page);
       
-      // Click Camera Auth tab
-      await page.getByRole('tab', { name: /camera auth/i }).click();
+      // Click Cameras tab
+      await page.getByRole('tab', { name: /^cameras$/i }).click();
       await sleep(500);
       
-      // Check for remember checkbox
-      const rememberCheckbox = await page.locator('#remember-credentials, input[type="checkbox"]').first().isVisible().catch(() => false);
+      // Check for camera configuration section
+      const cameraConfigSection = await page.locator('text=Camera Configuration').isVisible().catch(() => false);
+      const addCameraButton = await page.locator('button:has-text("Add Camera")').isVisible().catch(() => false);
       
-      if (rememberCheckbox) {
-        // Toggle it
-        await page.locator('#remember-credentials, input[type="checkbox"]').first().click();
-        await sleep(300);
-        
-        return true;
-      }
-      
-      return false;
+      return cameraConfigSection && addCameraButton;
     } finally {
       await browser.close();
     }
@@ -221,26 +215,26 @@ async function runTests() {
       await page.goto(`${baseUrl}/settings`);
       await waitForNetworkIdle(page);
       
-      // Click Camera Auth tab
-      await page.getByRole('tab', { name: /camera auth/i }).click();
+      // Click Cameras tab
+      await page.getByRole('tab', { name: /^cameras$/i }).click();
       await sleep(300);
       
-      const cameraFormVisible = await page.locator('#camera-username').isVisible().catch(() => false);
+      const camerasFormVisible = await page.locator('text=Default Camera Credentials').isVisible().catch(() => false);
       
       // Click Account tab
-      await page.getByRole('tab', { name: /account/i }).click();
+      await page.getByRole('tab', { name: /^account$/i }).click();
       await sleep(300);
       
       const accountFormVisible = await page.locator('#new-username').isVisible().catch(() => false);
       
-      return cameraFormVisible && accountFormVisible;
+      return camerasFormVisible && accountFormVisible;
     } finally {
       await browser.close();
     }
   }, results);
 
-  // Test 9: Save button exists for both tabs
-  await runTest('Save buttons exist for both tabs', async () => {
+  // Test 9: Save button exists in settings
+  await runTest('Save buttons exist in settings', async () => {
     const { browser, context, page } = await setupBrowser(TEST_CONFIG.browser);
     
     try {
@@ -250,17 +244,15 @@ async function runTests() {
       await page.goto(`${baseUrl}/settings`);
       await waitForNetworkIdle(page);
       
-      // Check Account tab
-      await page.getByRole('tab', { name: /account/i }).click();
-      await sleep(300);
-      const accountButton = await page.locator('button:has-text("Update"), button[type="submit"]').isVisible().catch(() => false);
+      // Check for Save Settings button at bottom (universal across tabs)
+      const saveButton = await page.locator('button:has-text("Save Settings")').isVisible().catch(() => false);
       
-      // Check Camera Auth tab
-      await page.getByRole('tab', { name: /camera auth/i }).click();
+      // Check Account tab has update button
+      await page.getByRole('tab', { name: /^account$/i }).click();
       await sleep(300);
-      const cameraButton = await page.locator('button:has-text("Save"), button[type="submit"]').isVisible().catch(() => false);
+      const accountButton = await page.locator('button:has-text("Update")').isVisible().catch(() => false);
       
-      return accountButton && cameraButton;
+      return saveButton && accountButton;
     } finally {
       await browser.close();
     }
