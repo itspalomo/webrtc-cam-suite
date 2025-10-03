@@ -31,6 +31,32 @@ webrtc-camera-suite/
 └── README.md            # This file
 ```
 
+## 📸 Screenshots
+
+<div align="center">
+
+### Login & Authentication
+<img src="screenshots/01-login-page.png" alt="Secure login page with default credentials notice" width="800"/>
+
+*Secure login page with dual authentication system (site + camera credentials)*
+
+### Camera Grid
+<img src="screenshots/02-camera-grid.png" alt="Camera grid showing all available streams" width="800"/>
+
+*Modern camera grid interface with status indicators and quick access*
+
+### Settings - Server Configuration
+<img src="screenshots/03-settings-server.png" alt="Server settings with MediaMTX configuration" width="800"/>
+
+*Easy server configuration with MediaMTX and ICE server setup*
+
+### Settings - Account Security
+<img src="screenshots/04-settings-account.png" alt="Account security settings" width="800"/>
+
+*Account management with security warnings for default credentials*
+
+</div>
+
 ## 🚀 Features
 
 - **🔐 Secure Authentication**: HTTP Basic Auth with configurable credential storage
