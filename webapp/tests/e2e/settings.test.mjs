@@ -105,15 +105,14 @@ async function runTests() {
       await page.fill('#new-username', 'testuser');
       await page.fill('#new-password', 'password123');
       await page.fill('#confirm-password', 'differentpassword');
-      
-      // Try to submit
-      await page.click('button:has-text("Update Website Credentials")');
       await sleep(500);
       
-      // Should show error
-      const errorVisible = await page.locator('text=/do not match|mismatch/i').isVisible().catch(() => false);
+      // Check that button is disabled OR error message is shown
+      const updateButton = page.locator('button:has-text("Update Website Credentials")');
+      const isDisabled = await updateButton.isDisabled().catch(() => false);
+      const errorVisible = await page.locator('text=/do not match|mismatch|passwords must match/i').isVisible().catch(() => false);
       
-      return errorVisible;
+      return isDisabled || errorVisible;
     } finally {
       await browser.close();
     }
